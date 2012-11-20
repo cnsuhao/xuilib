@@ -14,6 +14,7 @@ public:
 
 class IXText : public IXDraw
 {
+public:
 	virtual CString GetText() = 0;
 };
 

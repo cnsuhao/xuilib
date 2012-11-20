@@ -19,6 +19,7 @@ public:
 
 public:
 	IXText * SetText(IXText *pText);
+	CString GetText();
 
 public:
 	virtual BOOL PaintForeground(HDC hDC, const CRect &rect);
