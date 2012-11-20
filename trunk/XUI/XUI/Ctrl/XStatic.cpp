@@ -56,6 +56,14 @@ IXText * CXStatic::SetText( IXText *pText )
 	return pOldText;
 }
 
+CString CXStatic::GetText()
+{
+	if (!m_pText)
+		return CString(_T(""));
+
+	return m_pText->GetText();
+}
+
 VOID CXStatic::ChangeFrameRect( const CRect & rcNewFrameRect )
 {
 	if (GetRect() == rcNewFrameRect)
