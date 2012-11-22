@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "XTextGdiPlus.h"
 
+#include "..\..\..\XLib\inc\interfaceS\string\StringCode.h"
+
+#include <math.h>
+
+
+
 CXTextGdiPlus::CXTextGdiPlus(void)
 	: m_dcBuffer(NULL), m_hBufferOldBmp(NULL), m_rcDst(0, 0, 0, 0),
 	m_strText(_T("")),
@@ -153,25 +159,73 @@ BOOL CXTextGdiPlus::RefreashBufferDC(HDC hDCSrc)
 	Gdiplus::Graphics graph(m_dcBuffer);
 	graph.SetTextRenderingHint(m_Rendering);
 
-#ifdef _UNICODE
-	Gdiplus::FontFamily fontFamily(m_strFontName);  
-#else
-	Gdiplus::FontFamily fontFamily(XLibS::StringCode::ConvertAnsiStrToWideStr(m_strFontName));
-#endif
+	Gdiplus::FontFamily fontFamily(XLibST2W(m_strFontName));  
 	Gdiplus::Font font(&fontFamily, m_nSize, m_FontStyle, Gdiplus::UnitPixel);  
 	Gdiplus::StringFormat stringformat;
 	stringformat.SetAlignment(m_AlignmentH);
-	stringformat.SetLineAlignment(m_AlignmentV);
+	stringformat.SetLineAlignment(m_AlignmentV == Gdiplus::StringAlignmentCenter ?
+		Gdiplus::StringAlignmentNear : m_AlignmentV);
 	stringformat.SetFormatFlags(m_FormatFlags);
 	stringformat.SetTrimming(Gdiplus::StringTrimmingEllipsisWord);
-	
 	Gdiplus::SolidBrush brush(Gdiplus::Color(m_cAlpha, m_ColorR, m_ColorG, m_ColorB));
 
-#ifdef _UNICODE
-	graph.DrawString(m_strText, -1, &font, Gdiplus::RectF(0, 0, m_rcDst.Width(), m_rcDst.Height()), &stringformat, &brush);
-#else
-	graph.DrawString(XLibS::StringCode::ConvertAnsiStrToWideStr(m_strText), -1, &font, Gdiplus::RectF(0, 0, m_rcDst.Width(), m_rcDst.Height()), &stringformat, &brush);
-#endif
+	Gdiplus::RectF rfTargetRect(0, 0, m_rcDst.Width(), m_rcDst.Height());
+	CStringW strTextToDraw(XLibST2W(m_strText));
+
+	// When centering texts vertically, gdi+ will put the texts a litter higher, 
+	// so we'll handle vertically centering ourselves. 
+	if (m_AlignmentV == Gdiplus::StringAlignmentCenter)
+	{
+		Gdiplus::RectF rfBoundRect(0, 0, 0, 0);
+		graph.MeasureString(strTextToDraw, -1, &font, rfTargetRect, &stringformat, &rfBoundRect);
+		UINT nBufferWidth = rfTargetRect.Width, nBufferHeight = ceil(rfBoundRect.Height);
+
+		UINT32 *pBufferBmp = NULL;
+		HDC dcBuffer = ::CreateCompatibleDC(m_dcBuffer);
+		HGDIOBJ hOldBmp = ::SelectObject(dcBuffer, (HGDIOBJ)Util::CreateDIBSection32(nBufferWidth, nBufferHeight, (BYTE **)&pBufferBmp));
+
+		Gdiplus::Graphics graBuffer(dcBuffer);
+		graBuffer.SetTextRenderingHint(m_Rendering);
+
+		graBuffer.DrawString(strTextToDraw, -1, &font, rfTargetRect, &stringformat, &brush);
+
+		CRect rcStrictBound(0, 0, nBufferWidth, nBufferHeight);
+		BOOL bTopFound = FALSE, bBottomFound = FALSE;
+		for (UINT line = 0; line < nBufferHeight; line++)
+		{
+			for (UINT col = 0; col < nBufferWidth; col++)
+			{
+				// bottom bits. 
+				if (!bBottomFound && *(pBufferBmp + line * nBufferWidth + col) != 0)
+				{
+					bBottomFound = TRUE;
+					rcStrictBound.bottom -= line;
+				}
+
+				// top bits. 
+				if (!bTopFound && *(pBufferBmp + (nBufferHeight - line - 1) * nBufferWidth + col) != 0)
+				{
+					bTopFound = TRUE;
+					rcStrictBound.top += line;
+				}
+
+				if (bBottomFound && bTopFound) break;
+			}
+
+			if (bBottomFound && bTopFound) break;
+		}
+
+		CRect rcTarget(0, (m_rcDst.Height() - rcStrictBound.Height()) / 2, 0, 0);
+		rcTarget.right = rcTarget.left + rcStrictBound.Width();
+		rcTarget.bottom = rcTarget.top + rcStrictBound.Height();
+
+		Util::BitBlt(dcBuffer, rcStrictBound, m_dcBuffer, rcTarget);
+
+		::DeleteObject(::SelectObject(dcBuffer, hOldBmp));
+		::DeleteDC(dcBuffer);
+	}
+	else
+		graph.DrawString(strTextToDraw, -1, &font, rfTargetRect, &stringformat, &brush);
 	
 	return TRUE;
 }
