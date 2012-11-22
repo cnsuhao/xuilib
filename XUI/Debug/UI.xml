@@ -102,99 +102,99 @@
   <XScrollFrame top="70" width="140" height="reach_parent" v_scroll="true" margin_bottom="35">
     <XDock dock_type="top2bottom" align_type="low" width="130" height="wrap_content">
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="George" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="George" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="John" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="John" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Thomas" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Thomas" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="James" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="James" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="James" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="James" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="John" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="John" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Andrew" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Andrew" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Martin" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Martin" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="William" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="William" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="John" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="John" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="James" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="James" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Zachary" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Zachary" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Millard" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Millard" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Franklin" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Franklin" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="James" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="James" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Abraham" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Abraham" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Andrew" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Andrew" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Ulysses" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Ulysses" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Rutherford" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Rutherford" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="James" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="James" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/gjgj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Chester" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Chester" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjbk.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Stephen" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Stephen" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjsj.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Benjamin" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Benjamin" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame bg="skin/rjxz.png"  bg_type="normal" margin_left="15" width="120" height="30">
-        <XStatic left="30" top="4" width="80" height="26" text="Stephen" text_align_v="middle" text_align_h="center" font_size="14">
+        <XStatic left="30" top="0" width="80" height="reach_parent" text="Stephen" text_align_v="middle" text_align_h="center" font_size="14">
       </XStatic>
     </XFrame>
       <XFrame margin_left="15" width="120" height="60">
