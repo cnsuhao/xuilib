@@ -198,7 +198,7 @@
       </XStatic>
     </XFrame>
       <XFrame margin_left="15" width="120" height="60">
-        <XAnimation left="30" top="10" width="wrap_content" height="wrap_content" frames="@img/ctrl/waiting.png" frame_count="12" switch_interval="30" />
+        <XAnimation left="30" top="10" width="wrap_content" height="wrap_content" frames="@img/ctrl/waiting.png" frame_count="18" switch_interval="30" />
       </XFrame>
     </XDock>
   </XScrollFrame>
