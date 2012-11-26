@@ -47,6 +47,7 @@ LRESULT CXFrameMsgMgr::HandleMessage( UINT uMsg, WPARAM wParam, LPARAM lParam, B
 	HANDLE_MESSAGE_SPCIAL(WM_SETCURSOR, HandleSetCursorMessage, FALSE)
 
 	HANDLE_MESSAGE_SPCIAL(WM_MOUSEMOVE, HandleHoverLeaveMessage, FALSE)
+	HANDLE_MESSAGE_SPCIAL(WM_LBUTTONDOWN, HandleHoverLeaveMessage, FALSE)
 	HANDLE_MESSAGE_SPCIAL(WM_MOUSELEAVE, HandleHoverLeaveMessage, FALSE)
 
 	HANDLE_MESSAGE_NORMAL(WM_LBUTTONDOWN, FALSE)
@@ -252,6 +253,12 @@ BOOL CXFrameMsgMgr::ReleaseCaptureMouse( CXFrame *pFrame )
 
 	m_rFrameCaptureMouse = NULL;
 
+	CPoint ptCursor(0 ,0);
+	GetCursorPos(&ptCursor);
+	CXFrame *pFrameMouseIn = 
+		m_rFrameBase->GetTopFrameFromPoint(m_rFrameBase->ScreenToFrame(ptCursor));
+	UpdateMouseIn(pFrameMouseIn);
+
 	return TRUE;
 }
 
@@ -264,64 +271,22 @@ BOOL CXFrameMsgMgr::HandleHoverLeaveMessage( UINT uMsg, WPARAM wParam, LPARAM lP
 	switch(uMsg)
 	{
 	case WM_MOUSELEAVE:
-		while (m_vrMouseIn.size())
-		{
-			LRESULT lUnused = 0;
-			BOOL bUnused = TRUE;
-
-			if (m_vrMouseIn.back())
-				m_vrMouseIn.back()->ProcessFrameMessage(WM_MOUSELEAVE, 0, 0, lUnused, bUnused);
-			m_vrMouseIn.pop_back();
-		}
+		UpdateMouseIn(NULL);
 		bRtn = FALSE;
 		break;
 		
 	case WM_MOUSEMOVE:
+	case WM_LBUTTONDOWN:
 		TrackMouseEvent();
+		CXFrame *pFrameMouseIn = NULL;
 		if (m_rFrameBase)
-		{
-			LRESULT lUnused = 0;
-			BOOL bUnused = TRUE;
-
-			std::deque<CXFrame *> dqCurrentPath;
-			CXFrame *pFrame = m_rFrameBase->GetTopFrameFromPoint(CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
-			while (pFrame)
-			{
-				dqCurrentPath.push_front(pFrame);
-				pFrame = pFrame->GetParent();
-			}
-
-			UINT i = 0;
-			for (; i < dqCurrentPath.size() && i < m_vrMouseIn.size(); i++)
-				if (dqCurrentPath[i] != m_vrMouseIn[i])
-					break;
-
-			while (i < m_vrMouseIn.size())
-			{
-				if (m_vrMouseIn.back())
-					m_vrMouseIn.back()->ProcessFrameMessage(WM_MOUSELEAVE, 0, 0, lUnused, bUnused);
-				m_vrMouseIn.pop_back();
-			}
-
-			while (i < dqCurrentPath.size())
-			{
-				if (dqCurrentPath[i])
-					dqCurrentPath[i]->ProcessFrameMessage(WM_X_MOUSEENTER, 0, 0, lUnused, bUnused);
-				else
-				{
-					ATLASSERT(NULL);
-					break;
-				}
-
-				m_vrMouseIn.push_back(dqCurrentPath[i]);
-
-				i++;
-			}
-		}
+			pFrameMouseIn = m_rFrameCaptureMouse ? 
+			m_rFrameCaptureMouse :
+			m_rFrameBase->GetTopFrameFromPoint(CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+		UpdateMouseIn(pFrameMouseIn);
 		bRtn = TRUE;
 		break;
 	}
-
 
 	return bRtn;
 }
@@ -342,7 +307,7 @@ VOID CXFrameMsgMgr::TrackMouseEvent()
 
 BOOL CXFrameMsgMgr::HandleCreateMsg( UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& lResult, BOOL &bHandled)
 {
-	TrackMouseEvent();
+//	TrackMouseEvent();
 	return FALSE;
 }
 
@@ -358,4 +323,60 @@ BOOL CXFrameMsgMgr::HandleSetCursorMessage( UINT uMsg, WPARAM wParam, LPARAM lPa
 	}
 
 	return FALSE;
+}
+
+VOID CXFrameMsgMgr::UpdateMouseIn( CXFrame *pFrameMouseIn )
+{
+	if (!pFrameMouseIn)
+		while (m_vrMouseIn.size())
+		{
+			LRESULT lUnused = 0;
+			BOOL bUnused = FALSE;
+
+			if (m_vrMouseIn.back())
+				m_vrMouseIn.back()->ProcessFrameMessage(WM_MOUSELEAVE, 0, 0, lUnused, bUnused);
+			m_vrMouseIn.pop_back();
+		}
+	else
+	{
+		std::deque<CXFrame *> dqCurrentPath;
+		while (pFrameMouseIn)
+		{
+			dqCurrentPath.push_front(pFrameMouseIn);
+			pFrameMouseIn = pFrameMouseIn->GetParent();
+		}
+
+		UINT i = 0;
+		for (; i < dqCurrentPath.size() && i < m_vrMouseIn.size(); i++)
+			if (dqCurrentPath[i] != m_vrMouseIn[i])
+				break;
+
+		while (i < m_vrMouseIn.size())
+		{
+			LRESULT lUnused = 0;
+			BOOL bUnused = FALSE;
+
+			if (m_vrMouseIn.back())
+				m_vrMouseIn.back()->ProcessFrameMessage(WM_MOUSELEAVE, 0, 0, lUnused, bUnused);
+			m_vrMouseIn.pop_back();
+		}
+
+		while (i < dqCurrentPath.size())
+		{
+			LRESULT lUnused = 0;
+			BOOL bUnused = FALSE;
+
+			if (dqCurrentPath[i])
+				dqCurrentPath[i]->ProcessFrameMessage(WM_X_MOUSEENTER, 0, 0, lUnused, bUnused);
+			else
+			{
+				ATLASSERT(NULL);
+				break;
+			}
+
+			m_vrMouseIn.push_back(dqCurrentPath[i]);
+
+			i++;
+		}
+	}
 }

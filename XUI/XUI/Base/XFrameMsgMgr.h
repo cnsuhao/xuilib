@@ -99,4 +99,5 @@ private:
 	CXFrame* GetMessageTarget(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	VOID PrepareMessageForFrame(UINT uMsg, WPARAM *pwParam, LPARAM *plParam, CXFrame *pFrame);
 	VOID TrackMouseEvent();
+	VOID UpdateMouseIn(CXFrame *pFrameMouseIn);
 };
