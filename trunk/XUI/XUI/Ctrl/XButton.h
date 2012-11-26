@@ -25,7 +25,6 @@ public:
 		WIDTH_MODE aWidthMode = WIDTH_MODE_NOT_CHANGE, HEIGHT_MODE aHeightMode = HEIGHT_MODE_NOT_CHANGE);
 
 public:
-	virtual IXImage * SetBackground(IXImage * pDrawBackground);
 	virtual VOID Destroy();
 
 protected:
@@ -33,6 +32,9 @@ protected:
 
 public:
 	BOOL EnableButton(BOOL bEnable = TRUE);
+
+private:
+	enum BtnState {BTN_NORMAL = 0, BTN_HOVER, BTN_DOWN, BTN_DISABLED};
 
 private:
 	VOID RefreashButtonFace();
@@ -48,10 +50,7 @@ public:
 	CXButton(void);
 
 private:
-	enum BtnState {BTN_NORMAL = 0, BTN_HOVER, BTN_DOWN, BTN_DISABLED};
-
-private:
-	BtnState m_state;
 	BOOL m_bMouseIn;
+	BOOL m_bMouseDown;
 	BOOL m_bDisabled;
 };

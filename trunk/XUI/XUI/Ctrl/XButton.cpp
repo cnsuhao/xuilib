@@ -36,7 +36,8 @@ CXFrame * CXButton::CreateFrameFromXML(X_XML_NODE_TYPE xml, CXFrame *pParent)
 
 CXButton::CXButton(void)
 	: m_bMouseIn(FALSE),
-	m_bDisabled(TRUE)
+	m_bMouseDown(FALSE),
+	m_bDisabled(FALSE)
 {
 }
 
@@ -47,7 +48,6 @@ BOOL CXButton::Create(  CXFrame * pFrameParent, const CRect &rc /*= CRect(0, 0, 
 	BOOL bRtn = __super::Create(pFrameParent, rc, bVisible, aWidthMode, aHeightMode);
 
 	m_bDisabled = bDisabled;
-	m_state = bDisabled ? BTN_DISABLED : BTN_NORMAL;
 
 	if (!pBackground)
 		pBackground = CXResourceMgr::GetImage(_T("img/ctrl/button.9.png"));
@@ -56,25 +56,18 @@ BOOL CXButton::Create(  CXFrame * pFrameParent, const CRect &rc /*= CRect(0, 0, 
 
 	delete SetBackground(pBackground);
 
+	RefreashButtonFace();
+
 	return bRtn;
 }
 
 VOID CXButton::Destroy()
 {
 	m_bMouseIn = FALSE;
-	m_bDisabled = TRUE;
+	m_bMouseDown = FALSE;
+	m_bDisabled = FALSE;
 
 	__super::Destroy();
-}
-
-IXImage * CXButton::SetBackground( IXImage * pDrawBackground )
-{
-	ATLASSERT(!pDrawBackground || pDrawBackground->GetImageWidth() % 4 == 0);
-
-	IXImage *pRtn = __super::SetBackground(pDrawBackground);
-	RefreashButtonFace();
-
-	return pRtn;
 }
 
 VOID CXButton::RefreashButtonFace()
@@ -86,8 +79,15 @@ VOID CXButton::RefreashButtonFace()
 
 	ATLASSERT(pBackground->GetImageWidth() % 4 == 0);
 
-	pBackground->SetSrcRect(CRect( CPoint(m_state * pBackground->GetImageWidth() / 4, 0), 
+	BtnState state = m_bDisabled ? BTN_DISABLED : BTN_NORMAL;
+
+	if (!m_bDisabled && m_bMouseIn)
+		state = m_bMouseDown ? BTN_DOWN : BTN_HOVER;
+
+	pBackground->SetSrcRect(CRect( CPoint(state * pBackground->GetImageWidth() / 4, 0), 
 		CSize(pBackground->GetImageWidth() / 4, pBackground->GetImageHeight())));
+
+	InvalidateRect();
 }
 
 LRESULT CXButton::OnLButtonDown( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble )
@@ -97,10 +97,13 @@ LRESULT CXButton::OnLButtonDown( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	if (m_bDisabled)
 		return 0;
 
-	m_state = BTN_DOWN;
+	m_bMouseDown = TRUE;
+
 	RefreashButtonFace();
 
-	InvalidateRect();
+	CXFrameMsgMgr *pMgr = GetFrameMsgMgr();
+	if (pMgr)
+		pMgr->CaptureMouse(this);
 
 	return 0;
 }
@@ -109,17 +112,21 @@ LRESULT CXButton::OnLButtonUp( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bH
 {
 	bHandled = TRUE;
 
+	if (!m_bMouseDown)
+		return 0;
+
+	m_bMouseDown = FALSE;
+
+	CXFrameMsgMgr *pMgr = GetFrameMsgMgr();
+	if (pMgr)
+		pMgr->ReleaseCaptureMouse(this);
+
 	if (m_bDisabled)
 		return 0;
 
-	BOOL bThrowClick = (m_state == BTN_DOWN);
-
-	m_state = m_bMouseIn ? BTN_HOVER : BTN_NORMAL;
 	RefreashButtonFace();
 
-	InvalidateRect();
-
-	if (bThrowClick)
+	if (::PtInRect(&ParentToChild(GetRect()), CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam))))
 		ThrowEvent(EVENT_BUTTON_CLICKED, 0, 0);
 
 	return 0;
@@ -132,10 +139,7 @@ LRESULT CXButton::OnMouseEnter( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& b
 	if (m_bDisabled)
 		return 0;
 
-	m_state = BTN_HOVER;
 	RefreashButtonFace();
-
-	InvalidateRect();
 
 	return 0;
 }
@@ -147,10 +151,7 @@ LRESULT CXButton::OnMouseLeave( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& b
 	if (m_bDisabled)
 		return 0;
 
-	m_state = BTN_NORMAL;
 	RefreashButtonFace();
-
-	InvalidateRect();
 
 	return 0;
 }
@@ -162,13 +163,7 @@ BOOL CXButton::EnableButton( BOOL bEnable /*= TRUE*/ )
 
 	m_bDisabled = !bEnable;
 
-	if (m_bDisabled)
-		m_state = BTN_DISABLED;
-	else
-		m_state = m_bMouseIn ? BTN_HOVER: BTN_NORMAL;
 	RefreashButtonFace();
-
-	InvalidateRect();
 
 	return TRUE;
 }
@@ -177,5 +172,3 @@ INT CXButton::CalculateAdaptBackgroundWidth()
 {
 	return __super::CalculateAdaptBackgroundWidth() / 4;
 }
-
-
