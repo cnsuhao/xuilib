@@ -6,6 +6,8 @@
 #include "..\..\..\XLib\inc\interfaceS\string\StringCode.h"
 
 #include "XMessageService.h"
+#include "XResourceMgr.h"
+
 #include <list>
 
 std::vector<BOOL> CXFrame::s_bActiveInstances;
@@ -14,8 +16,18 @@ X_IMPLEMENT_FRAME_XML_RUNTIME(CXFrame)
 X_IMPLEMENT_DEFAULT_FRAME_XML_FACTORY(CXFrame)
 
 CXFrame::CXFrame(void)
-	:m_pFrameParent(NULL),
+	: m_pFrameParent(NULL),
 	m_pDrawBackground(NULL),
+	m_bTouchable(FALSE),
+	m_pMouseOverLayer(NULL),
+	m_pMouseDownLayer(NULL),
+	m_bSelectable(FALSE),
+	m_bSelectWhenMouseCilck(FALSE),
+	m_bUnselectWhenMouseCilck(FALSE),
+	m_bSelectedState(FALSE),
+	m_pSelectedLayer(FALSE),
+	m_bMouseOver(FALSE),
+	m_bMouseDown(FALSE),
 	m_bVisible(FALSE),
 	m_bHoldPlace(TRUE),
 	m_rcFrame(0, 0, 0, 0),
@@ -79,6 +91,21 @@ VOID CXFrame::Destroy()
 	SetMargin(CRect(0, 0, 0, 0));
 
 	delete SetBackground(NULL);
+
+	SetHoldPlace(TRUE);
+
+	SetTouchable(FALSE);
+	delete SetMouseOverLayer(NULL);
+	delete SetMouseDownLayer(NULL);
+	
+	SetSelectable(FALSE);
+	SetSelectWhenMouseClick(FALSE);
+	SetUnselectWhenMouseClick(FALSE);
+	SetSelectedState(FALSE);
+	delete SetSelectedLayer(NULL);
+
+	m_bMouseOver = FALSE;
+	m_bMouseDown = FALSE;
 
 	m_mapEventListener.clear();
 }
@@ -282,8 +309,15 @@ VOID CXFrame::ChangeFrameRect( const CRect & rcNewFrameRect )
 	CRect rcFrameRectOld(m_rcFrame);
 	m_rcFrame = rcNewFrameRect;
 
+	CRect rcFrameDrawArea(0, 0, rcNewFrameRect.Width(), rcNewFrameRect.Height());
 	if (m_pDrawBackground)
-		m_pDrawBackground->SetDstRect(CRect(0, 0, rcNewFrameRect.Width(), rcNewFrameRect.Height()));
+		m_pDrawBackground->SetDstRect(rcFrameDrawArea);
+	if (m_pMouseOverLayer)
+		m_pMouseOverLayer->SetDstRect(rcFrameDrawArea);
+	if (m_pMouseDownLayer)
+		m_pMouseDownLayer->SetDstRect(rcFrameDrawArea);
+	if (m_pSelectedLayer)
+		m_pSelectedLayer->SetDstRect(rcFrameDrawArea);
 
 	if (IsVisible())
 	{
@@ -476,9 +510,10 @@ CXFrameMsgMgr *CXFrame::GetFrameMsgMgr()
 
 CXFrame * CXFrame::GetTopFrameFromPoint(const CPoint &pt)
 {
-	CXFrame * pFrame = NULL;
-	if (::PtInRect(&CRect(0, 0, m_rcFrame.Width(), m_rcFrame.Height()), pt))
-		pFrame = this;
+	if (!::PtInRect(&CRect(0, 0, m_rcFrame.Width(), m_rcFrame.Height()), pt))
+		return NULL;
+
+	CXFrame * pFrame = this;
 
 	std::vector<CXFrame *>::const_reverse_iterator iter = m_vecFrameChild.rbegin();
 	for (; iter != m_vecFrameChild.rend(); ++iter)
@@ -779,6 +814,27 @@ BOOL CXFrame::PaintBackground( HDC hDC, const CRect &rect )
 
 BOOL CXFrame::PaintForeground( HDC hDC, const CRect &rect )
 {
+	if (m_bSelectable && m_bSelectedState)
+	{
+		if (FillSelectedLayer())
+			m_pSelectedLayer->Draw(hDC, rect);
+		else ATLASSERT(NULL);
+	}
+
+	if (m_bTouchable && m_bMouseOver)
+		if (m_bMouseDown)
+		{
+			if (FillMouseDownLayer())
+				m_pMouseDownLayer->Draw(hDC, rect);
+			else ATLASSERT(NULL);
+		}
+		else
+		{
+			if (FillMouseOverLayer())
+				m_pMouseOverLayer->Draw(hDC, rect);
+			else ATLASSERT(NULL);
+		}
+
 	std::vector<CXFrame *>::const_iterator iter = m_vecFrameChild.begin();
 	for(; iter != m_vecFrameChild.end(); ++iter)
 		if(*iter && (*iter)->IsVisible())
@@ -807,6 +863,7 @@ BOOL CXFrame::PaintForeground( HDC hDC, const CRect &rect )
 			::DeleteObject(hRgnOldClip);	
 		}
 
+
 	return TRUE;
 }
 
@@ -833,17 +890,13 @@ BOOL CXFrame::ConfigFrameByXML( X_XML_NODE_TYPE xml )
 	if (!xml)
 		return FALSE;
 
-	IXImage *pBackground = NULL;
-
-	pBackground = CXFrameXMLFactory::BuildImage(xml, "bg", "bg_type", "stretch", "bg_part_");
-	
-	if (pBackground)
-		delete SetBackground(pBackground);
-
 	X_XML_ATTR_TYPE attr = NULL;
 
-	CRect rcMargin(0, 0, 0, 0);
+	IXImage *pBackgroud = CXFrameXMLFactory::BuildImage(xml, "bg", "bg_type", "stretch", "bg_part_");
+	if (pBackgroud)
+		delete SetBackground(pBackgroud);
 
+	CRect rcMargin(0, 0, 0, 0);
 	attr = xml->first_attribute("margin_left", 0, false);
 	if (attr) rcMargin.left = atoi(attr->value());
 	attr = xml->first_attribute("margin_top", 0, false);
@@ -852,16 +905,34 @@ BOOL CXFrame::ConfigFrameByXML( X_XML_NODE_TYPE xml )
 	if (attr) rcMargin.right = atoi(attr->value());
 	attr = xml->first_attribute("margin_bottom", 0, false);
 	if (attr) rcMargin.bottom = atoi(attr->value());
-
 	SetMargin(rcMargin);
+
+ 	attr = xml->first_attribute("touchable", 0, false);
+ 	if (attr && !StrCmpIA(attr->value(), "true"))
+ 		SetTouchable(TRUE);
+	IXImage *pMouseOverLayer = CXFrameXMLFactory::BuildImage(xml, "mouse_over_layer", "mouse_over_layer_type", "stretch", "mouse_over_layer_part_");
+ 	if (pMouseOverLayer) delete SetMouseOverLayer(pMouseOverLayer);
+	IXImage *pMouseDownLayer = CXFrameXMLFactory::BuildImage(xml, "mouse_down_layer", "mouse_down_layer_type", "stretch", "mouse_down_layer_part_");
+ 	if (pMouseDownLayer) delete SetMouseDownLayer(pMouseDownLayer);
+ 
+ 	attr = xml->first_attribute("selectable", 0, false);
+ 	if (attr && !StrCmpIA(attr->value(), "true"))
+ 		SetSelectable(TRUE);
+ 	attr = xml->first_attribute("mouse_click_select", 0, false);
+ 	if (attr && !StrCmpIA(attr->value(), "true"))
+ 		SetSelectWhenMouseClick(TRUE);
+ 	attr = xml->first_attribute("mouse_click_unselect", 0, false);
+ 	if (attr && !StrCmpIA(attr->value(), "true"))
+ 		SetUnselectWhenMouseClick(TRUE);
+ 	attr = xml->first_attribute("selected", 0, false);
+ 	if (attr && !StrCmpIA(attr->value(), "true"))
+ 		SetSelectedState(TRUE);
+	IXImage *pSelectedLayer = CXFrameXMLFactory::BuildImage(xml, "selected_layer", "selected_layer_type", "stretch", "selected_layer_part_");
+ 	if (pSelectedLayer) delete SetSelectedLayer(pSelectedLayer);
 
 	attr = xml->first_attribute("name", 0, false);
 	if (attr)
-#ifdef _UNICODE
-		SetName(XLibS::StringCode::ConvertAnsiStrToWideStr(attr->value()));
-#else
-		SetName(attr->value());
-#endif
+		SetName(XLibSA2T(attr->value()));
 
 	HandleXMLChildNodes(xml);
 
@@ -1288,3 +1359,192 @@ INT CXFrame::GetVCenter()
 {
 	return GetRect().Height() / 2;
 }
+
+BOOL CXFrame::FillMouseOverLayer()
+{
+	if (m_pMouseOverLayer)
+		return TRUE;
+
+	SetMouseOverLayer(CXResourceMgr::Instance().GetImage(_T("img/layer/mouse_over.9.png")));
+
+	return m_pMouseOverLayer != NULL;
+}
+
+BOOL CXFrame::FillMouseDownLayer()
+{
+	if (m_pMouseDownLayer)
+		return TRUE;
+
+	SetMouseDownLayer(CXResourceMgr::Instance().GetImage(_T("img/layer/mouse_down.9.png")));
+
+	return m_pMouseDownLayer != NULL;
+}
+
+BOOL CXFrame::FillSelectedLayer()
+{
+	if (m_pSelectedLayer)
+		return TRUE;
+
+	SetSelectedLayer(CXResourceMgr::Instance().GetImage(_T("img/layer/selected.9.png")));
+
+	return m_pSelectedLayer != NULL;
+}
+
+LRESULT CXFrame::OnMouseEnter( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble )
+{
+	m_bMouseOver = TRUE;
+
+	if (!m_bTouchable)
+		return 0;
+
+	InvalidateRect();
+
+	return 0;
+}
+
+LRESULT CXFrame::OnMouseLeave( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble )
+{
+	m_bMouseOver = FALSE;
+
+	if (!m_bTouchable)
+		return 0;
+
+	InvalidateRect();
+
+	return 0;
+}
+
+LRESULT CXFrame::OnLButtonUp( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble )
+{
+	if (!m_bMouseDown)
+		return 0;
+
+	m_bMouseDown = FALSE;
+
+	CXFrameMsgMgr *pMgr = GetFrameMsgMgr();
+	if (pMgr)
+		pMgr->ReleaseCaptureMouse(this);
+
+	if (m_bTouchable)
+		InvalidateRect();
+
+	if (m_bSelectable)
+		if (m_bSelectedState)
+		{
+			if (m_bUnselectWhenMouseCilck) SetSelectedState(FALSE);
+		}
+		else
+		{
+			if (m_bSelectWhenMouseCilck) SetSelectedState(TRUE);
+		}
+
+	return 0;
+}
+
+LRESULT CXFrame::OnLButtonDown( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble )
+{
+	if (!m_bTouchable && !m_bSelectWhenMouseCilck && !m_bUnselectWhenMouseCilck)
+		return 0;
+
+	m_bMouseDown = TRUE;
+
+	CXFrameMsgMgr *pMgr = GetFrameMsgMgr();
+	if (pMgr)
+		pMgr->CaptureMouse(this);
+
+	InvalidateRect();
+
+	return 0;
+}
+
+BOOL CXFrame::SetTouchable( BOOL b )
+{
+	if ((m_bTouchable && b) || (!m_bTouchable && !b))
+		return TRUE;
+
+	m_bTouchable = b;
+
+	InvalidateRect();
+
+	return TRUE;
+}
+
+IXImage * CXFrame::SetMouseOverLayer( IXImage *pLayer )
+{
+	IXImage *pOldLayer = m_pMouseOverLayer;
+
+	m_pMouseOverLayer = pLayer;
+
+	if (m_pMouseOverLayer)
+		m_pMouseOverLayer->SetDstRect(ParentToChild(GetRect()));
+
+	return pOldLayer;
+}
+
+IXImage * CXFrame::SetMouseDownLayer( IXImage *pLayer )
+{
+	IXImage *pOldLayer = m_pMouseDownLayer;
+
+	m_pMouseDownLayer = pLayer;
+
+	if (m_pMouseDownLayer)
+		m_pMouseDownLayer->SetDstRect(ParentToChild(GetRect()));
+
+	return pOldLayer;
+}
+
+BOOL CXFrame::SetSelectable( BOOL b )
+{
+	if ((m_bSelectable && b) || (!m_bSelectable && !b))
+		return TRUE;
+
+	m_bSelectable = b;
+
+	m_bSelectedState = FALSE;
+
+	InvalidateRect();
+
+	return TRUE;
+}
+
+BOOL CXFrame::SetSelectWhenMouseClick( BOOL b )
+{
+	m_bSelectWhenMouseCilck = b;
+
+	return TRUE;
+}
+
+BOOL CXFrame::SetUnselectWhenMouseClick( BOOL b )
+{
+	m_bUnselectWhenMouseCilck = b;
+
+	return TRUE;
+}
+
+BOOL CXFrame::SetSelectedState( BOOL b )
+{
+	if (!m_bSelectable)
+		return FALSE;
+
+	if ((m_bSelectedState && b) || (!m_bSelectedState && !b))
+		return TRUE;
+
+	m_bSelectedState = b;
+
+	InvalidateRect();
+
+	return TRUE;
+}
+
+IXImage * CXFrame::SetSelectedLayer( IXImage *pLayer )
+{
+	IXImage *pOldLayer = m_pSelectedLayer;
+
+	m_pSelectedLayer = pLayer;
+
+	if (m_pSelectedLayer)
+		m_pSelectedLayer->SetDstRect(ParentToChild(GetRect()));
+
+	return pOldLayer;
+}
+

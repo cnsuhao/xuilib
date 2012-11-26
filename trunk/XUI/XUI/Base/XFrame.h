@@ -28,6 +28,11 @@ class CXFrame :
 	END_FRAME_EVENT_MAP()
 
 	BEGIN_FRAME_MSG_MAP(CXFrame)
+		FRAME_MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
+		FRAME_MESSAGE_HANDLER(WM_LBUTTONDBLCLK, OnLButtonDown)
+		FRAME_MESSAGE_HANDLER(WM_LBUTTONUP, OnLButtonUp)
+		FRAME_MESSAGE_HANDLER(WM_MOUSELEAVE, OnMouseLeave)
+		FRAME_MESSAGE_HANDLER(WM_X_MOUSEENTER, OnMouseEnter)
 	END_FRAME_MSG_MAP()
 
 public:
@@ -57,6 +62,12 @@ public:
 	VOID OnChildRectChanged(CXFrame *pSrcFrame, UINT uEvent, WPARAM wParam, LPARAM lParam, BOOL& bHandled );
 	VOID OnChildMarginChanged(CXFrame *pSrcFrame, UINT uEvent, WPARAM wParam, LPARAM lParam, BOOL& bHandled );
 	VOID OnChildHoldPlaceStateChanged(CXFrame *pSrcFrame, UINT uEvent, WPARAM wParam, LPARAM lParam, BOOL& bHandled );
+
+public:
+	LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble);
+	LRESULT OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble);
+	LRESULT OnMouseEnter(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble);
+	LRESULT OnMouseLeave(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled, BOOL& bCancelBabble);
 
 public:
 	BOOL Create(CXFrame * pFrameParent, const CRect & rcRect = CRect(0, 0, 0, 0), BOOL bVisible = FALSE,
@@ -101,6 +112,16 @@ public:
 public:
 	virtual IXImage * SetBackground(IXImage * pDrawBackground);
 	IXImage * GetBackground();
+
+public:
+	BOOL SetTouchable(BOOL b);
+	IXImage * SetMouseOverLayer(IXImage *pLayer);
+	IXImage * SetMouseDownLayer(IXImage *pLayer);
+	BOOL SetSelectable(BOOL b);
+	BOOL SetSelectWhenMouseClick(BOOL b);
+	BOOL SetUnselectWhenMouseClick(BOOL b);
+	BOOL SetSelectedState(BOOL b);
+	IXImage * SetSelectedLayer(IXImage *pLayer);
 
 public:
 	virtual BOOL InvalidateRect(const CRect & rect);
@@ -168,6 +189,9 @@ protected:
 
 private:
 	VOID CalculateFrameRect(CRect *pRect);
+	BOOL FillMouseOverLayer();
+	BOOL FillMouseDownLayer();
+	BOOL FillSelectedLayer();
 
 private:
 	CString m_strFrameName;
@@ -175,6 +199,18 @@ private:
 	std::vector<CXFrame *> m_vecFrameChild;
 	CXFrame * m_pFrameParent;
 	IXImage * m_pDrawBackground;
+
+	BOOL m_bTouchable;
+	IXImage * m_pMouseOverLayer;
+	IXImage * m_pMouseDownLayer;
+	BOOL m_bSelectable;
+	BOOL m_bSelectWhenMouseCilck;
+	BOOL m_bUnselectWhenMouseCilck;
+	BOOL m_bSelectedState;
+	IXImage * m_pSelectedLayer;
+
+	BOOL m_bMouseOver;
+	BOOL m_bMouseDown;
 
 	CRect m_rcFrame;
 	CRect m_rcMargin;
