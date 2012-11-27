@@ -1428,6 +1428,9 @@ LRESULT CXFrame::OnLButtonUp( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	if (m_bTouchable)
 		InvalidateRect();
 
+	if (!::PtInRect(&ParentToChild(m_rcFrame), CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam))))
+		return 0;
+
 	if (m_bSelectable)
 		if (m_bSelectedState)
 		{
