@@ -26,6 +26,3 @@
 #include "Common/Util.h"
 
 #include "..\..\XLib\inc\convention.h"
-
-const CString & XLibPath();
-

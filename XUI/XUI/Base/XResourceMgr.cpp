@@ -29,7 +29,7 @@ BOOL CXResourceMgr::AddSearchPath( LPCTSTR pPath )
 		&& !PathIsDirectory(strPath))
 	{
 		IZipUnpack * pUnpack = NULL;
-		if (!SMCCreateInstance(XLibPath(), SMC_IDOF(IZipUnpack), (ISMCInterface**)&pUnpack) || !pUnpack)
+		if (!SMCCreateInstance(Util::GetXLibPath(), SMC_IDOF(IZipUnpack), (ISMCInterface**)&pUnpack) || !pUnpack)
 			return FALSE;
 		if (!pUnpack->Open(strPath))
 			return FALSE;
@@ -239,4 +239,10 @@ IXImage * CXResourceMgr::GetImage( LPCTSTR pRelativePath )
 	}
 
 	return pImage;
+}
+
+VOID CXResourceMgr::OnExit()
+{
+	m_vSearchPath.clear();
+	m_mapPackage.clear();
 }
