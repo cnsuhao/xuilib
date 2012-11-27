@@ -271,7 +271,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Base\XUI.cpp"
+				RelativePath=".\Base\XUILife.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Base\XUILife.h"
 				>
 			</File>
 			<File

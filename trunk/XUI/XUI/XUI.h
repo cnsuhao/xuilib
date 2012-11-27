@@ -15,5 +15,4 @@
 /// GDIPLUS
 #pragma comment(lib, "gdiplus.lib")
 
-/// XUI Initializing. 
-#pragma comment(linker, "/INCLUDE:?g_xui_life@@3VCXUILIFE@@A")
+#include "Base/XUILife.h"

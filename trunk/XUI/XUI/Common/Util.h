@@ -6,6 +6,8 @@ namespace Util
 
 	BOOL UninitGdiPlus();
 
+	const CString & GetXLibPath();
+
 	HBITMAP CreateDIBSection32(int nWidth, int nHeight, PBYTE *pBytes = NULL);
 
 	BOOL ClearRect(HDC dc, const CRect &rect);

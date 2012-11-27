@@ -36,6 +36,10 @@ private:
 	LPCTSTR FindPackageRelativePathFromFullPathAndSeprateThem(LPTSTR);
 
 private:
+	friend class XUILife;
+	VOID OnExit();
+
+private:
 	CXResourceMgr();
 
 private:

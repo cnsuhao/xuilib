@@ -101,3 +101,35 @@ BOOL Util::DrawLine( HDC dc, const CPoint &ptStart, const CPoint &ptEnd, UINT nW
 	return Gdiplus::Ok == 
 		graph.DrawLine(&pen, Gdiplus::Point(ptStart.x, ptStart.y), Gdiplus::Point(ptEnd.x, ptEnd.y));
 }
+
+const CString & Util::GetXLibPath()
+{
+	static CString strXLibPath;
+	if (!strXLibPath.IsEmpty())
+		return strXLibPath;
+
+	CString strLocalXLib(SMCRelativePath(_T("XLib.dll")));
+	if (::PathFileExists(strLocalXLib))
+	{
+		strXLibPath = strLocalXLib;
+		return strXLibPath;
+	}
+
+	TCHAR szDevXLib[MAX_PATH] = {};
+	::GetModuleFileName(NULL, szDevXLib, MAX_PATH);
+	::PathRemoveFileSpec(szDevXLib);
+#ifdef _DEBUG
+	::PathAppend(szDevXLib, _T("../../XLib/Debug/XLib.dll"));
+#else
+	::PathAppend(szDevXLib, _T("../../XLib/Release/XLib.dll"));
+#endif
+
+	if (::PathFileExists(szDevXLib))
+	{
+		strXLibPath = szDevXLib;
+		return strXLibPath;
+	}
+
+	ATLASSERT(!_T("FATAL ERROR: NO XLIB FOUND."));
+	return strXLibPath;
+}
