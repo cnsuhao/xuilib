@@ -1,0 +1,11 @@
+v1.0
+------
+First SF version. 
+
+v1.5
+------
+- Touchable and selectable have been supported in XFrame.
+- Correct button behaviors.
+- Correct XML errors.
+ 
+
