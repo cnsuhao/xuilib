@@ -13,7 +13,7 @@ namespace XLibS
 }
 
 #ifdef _UNICODE
-#define SplitString SplitStringA
-#else
 #define SplitString SplitStringW
+#else
+#define SplitString SplitStringA
 #endif

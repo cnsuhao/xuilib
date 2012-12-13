@@ -18,11 +18,9 @@ namespace XLibS
 #define XLibST2W(str) (str)
 #define XLibSA2T(str) XLibS::StringCode::ConvertAnsiStrToWideStr(str)
 #define XLibSW2T(str) (str)
-#define SplitString SplitStringA
 #else
 #define XLibST2A(str) (str)
 #define XLibST2W(str) XLibS::StringCode::ConvertAnsiStrToWideStr(str)
 #define XLibSA2T(str) (str)
 #define XLibSW2T(str) XLibS::StringCode::ConvertWideStrToAnsiStr(str)
-#define SplitString SplitStringW
 #endif
