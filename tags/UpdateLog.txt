@@ -9,3 +9,6 @@ v1.6
 - Correct XML errors.
 - Correct the release version crash. 
 
+v1.6.1
+------
+bug fix.
