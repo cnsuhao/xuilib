@@ -8,7 +8,8 @@ CXScrollBar::CXScrollBar()
 	m_nFrameLen(0), m_nViewLen(0), m_nPos(0),
 	m_rcBar(0, 0, 0, 0), 
 	m_bVisibleState(FALSE),
-	m_bMouseDown(FALSE), m_ptLastMousePt(0, 0)
+	m_bMouseDown(FALSE), m_ptLastMousePt(0, 0),
+	m_nMouseDownScrollPos(0)
 {
 
 }
@@ -162,6 +163,7 @@ LRESULT CXScrollBar::OnLButtonDown( UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 		if (pMsgMgr)
 		{
 			m_ptLastMousePt = CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			m_nMouseDownScrollPos =  GetScrollPos();
 			pMsgMgr->CaptureMouse(this);
 			m_bMouseDown = TRUE;
 		}
@@ -198,14 +200,13 @@ LRESULT CXScrollBar::OnMouseMove( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL&
 		nOffset = ptMouse.x - m_ptLastMousePt.x;
 	else
 		nOffset = ptMouse.y - m_ptLastMousePt.y;
-	m_ptLastMousePt = ptMouse;
 
 	if (nOffset != 0)
 	{
 		if (m_Type == SCROLL_H)
-			SetScrollPos(GetScrollPos() + nOffset * m_nFrameLen / GetRect().Width());
+			SetScrollPos(m_nMouseDownScrollPos + nOffset * m_nFrameLen / GetRect().Width());
 		else
-			SetScrollPos(GetScrollPos() + nOffset * m_nFrameLen / GetRect().Height());
+			SetScrollPos(m_nMouseDownScrollPos + nOffset * m_nFrameLen / GetRect().Height());
 	}
 
 	return 0;
@@ -243,6 +244,8 @@ LRESULT CXScrollBar::OnMouseWheel( UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
 
 VOID CXScrollBar::Destroy()
 {
+	m_nMouseDownScrollPos = 0;
+
 	delete SetBarImage(NULL);	
 	
 	return __super::Destroy();
