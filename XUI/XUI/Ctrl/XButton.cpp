@@ -172,3 +172,12 @@ INT CXButton::CalculateAdaptBackgroundWidth()
 {
 	return __super::CalculateAdaptBackgroundWidth() / 4;
 }
+
+IXImage * CXButton::SetBackground( IXImage * pDrawBackground )
+{
+	IXImage *pImage = __super::SetBackground(pDrawBackground);
+
+	RefreashButtonFace();
+
+	return pImage;
+}

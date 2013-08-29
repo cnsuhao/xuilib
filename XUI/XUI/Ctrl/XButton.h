@@ -26,6 +26,7 @@ public:
 
 public:
 	virtual VOID Destroy();
+	virtual IXImage * SetBackground(IXImage * pDrawBackground);
 
 protected:
 	virtual INT CalculateAdaptBackgroundWidth();

@@ -66,4 +66,5 @@ private:
 private:
 	BOOL m_bMouseDown;
 	CPoint m_ptLastMousePt;
+	INT m_nMouseDownScrollPos;
 };
